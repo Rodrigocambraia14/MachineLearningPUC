@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wine Quality Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #218838;
+            }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Wine Quality Predictor</h1>
+        <p>Predict wine quality based on features.<br>Note: The predicted wine quality ranges from <strong>4</strong> to <strong>7</strong>.</p>
+        <form id="wineForm">
+            <button type="button" id="generateRandom">Generate Random Values</button>
+            <input type="number" step="any" id="fixed_acidity" placeholder="Fixed Acidity" required>
+            <input type="number" step="any" id="volatile_acidity" placeholder="Volatile Acidity" required>
+            <input type="number" step="any" id="citric_acid" placeholder="Citric Acid" required>
+            <input type="number" step="any" id="residual_sugar" placeholder="Residual Sugar" required>
+            <input type="number" step="any" id="chlorides" placeholder="Chlorides" required>
+            <input type="number" step="any" id="free_sulfur_dioxide" placeholder="Free Sulfur Dioxide" required>
+            <input type="number" step="any" id="total_sulfur_dioxide" placeholder="Total Sulfur Dioxide" required>
+            <input type="number" step="any" id="density" placeholder="Density" required>
+            <input type="number" step="any" id="pH" placeholder="pH" required>
+            <input type="number" step="any" id="sulphates" placeholder="Sulphates" required>
+            <input type="number" step="any" id="alcohol" placeholder="Alcohol" required>
+            <button type="submit">Predict Quality</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('generateRandom').addEventListener('click', function () {
+            // Generate random values based on the dataset ranges
+            document.getElementById('fixed_acidity').value = (Math.random() * (15.9 - 4.6) + 4.6).toFixed(2);
+            document.getElementById('volatile_acidity').value = (Math.random() * (1.58 - 0.12) + 0.12).toFixed(2);
+            document.getElementById('citric_acid').value = (Math.random() * (1.00 - 0.00) + 0.00).toFixed(2);
+            document.getElementById('residual_sugar').value = (Math.random() * (15.5 - 0.90) + 0.90).toFixed(2);
+            document.getElementById('chlorides').value = (Math.random() * (0.61 - 0.01) + 0.01).toFixed(3);
+            document.getElementById('free_sulfur_dioxide').value = (Math.random() * (72.0 - 1.0) + 1.0).toFixed(0);
+            document.getElementById('total_sulfur_dioxide').value = (Math.random() * (289.0 - 6.0) + 6.0).toFixed(0);
+            document.getElementById('density').value = (Math.random() * (1.00369 - 0.99007) + 0.99007).toFixed(5);
+            document.getElementById('pH').value = (Math.random() * (4.01 - 2.74) + 2.74).toFixed(2);
+            document.getElementById('sulphates').value = (Math.random() * (2.00 - 0.33) + 0.33).toFixed(2);
+            document.getElementById('alcohol').value = (Math.random() * (14.9 - 8.4) + 8.4).toFixed(2);
+        });
+
+        document.getElementById('wineForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const features = {
+                fixed_acidity: parseFloat(document.getElementById('fixed_acidity').value),
+                volatile_acidity: parseFloat(document.getElementById('volatile_acidity').value),
+                citric_acid: parseFloat(document.getElementById('citric_acid').value),
+                residual_sugar: parseFloat(document.getElementById('residual_sugar').value),
+                chlorides: parseFloat(document.getElementById('chlorides').value),
+                free_sulfur_dioxide: parseFloat(document.getElementById('free_sulfur_dioxide').value),
+                total_sulfur_dioxide: parseFloat(document.getElementById('total_sulfur_dioxide').value),
+                density: parseFloat(document.getElementById('density').value),
+                pH: parseFloat(document.getElementById('pH').value),
+                sulphates: parseFloat(document.getElementById('sulphates').value),
+                alcohol: parseFloat(document.getElementById('alcohol').value)
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ features: Object.values(features) })
+                });
+
+                const result = await response.json();
+
+                if (result.prediction >= 4 && result.prediction <= 7) {
+                    document.getElementById('result').textContent = "Predicted Quality: " + result.prediction;
+                } else {
+                    document.getElementById('result').textContent = "Prediction out of range! Predicted quality must be between 5 and 7.";
+                }
+            } catch (error) {
+                document.getElementById('result').textContent = "Error predicting quality!";
+            }
+        });
+    </script>
+</body>
+</html>
